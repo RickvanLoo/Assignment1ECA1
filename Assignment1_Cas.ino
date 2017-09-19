@@ -1,14 +1,11 @@
 #define ASize 13
 
 //INIT MATRICES GLOBAL
-int8_t MatrixX[ASize][ASize];
-int8_t MatrixY[ASize][ASize];
-
-long MatrixOut[ASize][ASize];
-long Sum;
-
+uint8_t MatrixX[ASize][ASize];
+uint8_t MatrixY[ASize][ASize];
+uint32_t MatrixOut[ASize][ASize];
+int SetupMatrices(void);
 void setup(){
-
 }
 
 void loop(){
@@ -17,22 +14,30 @@ void loop(){
 
   //FILL MATRICES
   SetupMatrices();
-  unsigned long StartTime = millis();
-  for (size_t i = 0; i < 1000; i++) {
-    DotProduct();
-    Addition();
+  uint16_t StartTime = millis();
+  for (uint16_t iteration = 0; iteration < 1000; iteration++) {
+    for (uint8_t i = 0; i < ASize; i++) {
+      //force local array in cache
+      uint8_t MatX[ASize];
+      memcpy(MatX, MatrixX[i], ASize);
+      uint8_t MatY[ASize];
+      memcpy(MatY, MatrixY[i], ASize);
+      for (uint8_t j = 0; j < ASize; j++) {
+          uint32_t Sum = 0;
+          for (uint8_t k = 0; k < ASize; k++) {
+              Sum = Sum + (MatX[k]*MatrixY[k][j]);
+          }
+          MatrixOut[i][j] = Sum + MatX[j] + MatY[j];
+       }
+    }
   }
-  unsigned long CurrentTime = millis();
-  unsigned long ElapsedTime = CurrentTime - StartTime;
+  uint16_t CurrentTime = millis();
+  uint16_t ElapsedTime = CurrentTime - StartTime;
 
   Serial.println(ElapsedTime);
-
   PrintIt();
 
-
-
-  while(1){
-  }
+  while(1){}
 }
 
 //SetupMatrices initializes Matrices with random 8-bit numbers.
@@ -44,38 +49,6 @@ int SetupMatrices(void){
     }
   }
 }
-
-//DotProduct does the DotProduct between the matrices
-inline int DotProduct(void){
-  for (size_t i = 0; i < ASize; i++) {
-	int8_t MatX[ASize];
-  memcpy(MatX, MatrixX[i], ASize);
-    for (size_t j = 0; j < ASize; j++) {
-      int Sum = 0;
-      for (size_t k = 0; k < ASize; k++) {
-        Sum = Sum + (MatX[k]*MatrixY[k][j]);
-      }
-      MatrixOut[i][j] = Sum;
-    }
-  }
-}
-
-//Addition does the Addition between X and Y
-inline int Addition(void){
-  for (size_t i = 0; i < ASize; i++) {
-	//force local array in cache
-	int8_t MatX[ASize];
- memcpy(MatX, MatrixX[i], ASize);
-	int8_t MatY[ASize];
- memcpy(MatY, MatrixY[i], ASize);
-	int MatOut[ASize];
- memcpy(MatOut, MatrixOut[i], 4*ASize);
-    for (size_t j = 0; j < ASize; j++) {
-      MatrixOut[i][j] = MatOut[j] + MatX[j] + MatY[j];
-    }
-  }
-}
-
 
 int PrintIt(){
   //PRINT MATRICES
