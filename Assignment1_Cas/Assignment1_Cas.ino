@@ -38,17 +38,17 @@ void loop(){
   uint16_t StartTime = millis();
   for (uint16_t iteration = 0; iteration < 1000; iteration++) {
     for (uint8_t i = 0; i < ASize; i++) {
-      //force local array in cache
-      int8_t MatX[ASize];
-      memcpy(MatX, MatrixX[i], ASize);
-      int8_t MatY[ASize];
-      memcpy(MatY, MatrixY[i], ASize);
+      //make local copy of X and Y to speed up indexing
+      //int8_t MatX[ASize];
+      //memcpy(MatX, MatrixX[i], ASize);
+      //int8_t MatY[ASize];
+      //memcpy(MatY, MatrixY[i], ASize);
       for (uint8_t j = 0; j < ASize; j++) {
           int32_t Sum = 0;
           for (uint8_t k = 0; k < ASize; k++) {
-              Sum = Sum + int16_t(MatX[k]*MatrixY[k][j]);
+              Sum = Sum + MatrixX[i][k]*MatrixY[k][j];
           }
-          MatrixOut[i][j] = Sum + int16_t(MatX[j] + MatY[j]);
+          MatrixOut[i][j] = Sum + MatrixX[i][j] + MatrixY[i][j];
        }
     }
   }
@@ -57,7 +57,6 @@ void loop(){
 
   Serial.begin(9600);
   //Serial.println("starts");
-
   Serial.println(ElapsedTime);
   PrintIt();
 
